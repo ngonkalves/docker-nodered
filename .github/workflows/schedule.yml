@@ -20,7 +20,7 @@ jobs:
       - name: Fetch nodered version
         run: |
           curl -sL https://api.github.com/repos/node-red/node-red-docker/releases/latest | \
-          jq -r ".tag_name" | cut -c 2- > build/nodered.version
+          jq -r ".tag_name" | cut -c 2- > build/nodered.version && cat build/nodered.version
 
       - name: Check for modified files
         id: git-check
