@@ -3,7 +3,7 @@ name: Get latest release versions
 on:
   push:
     paths:
-      - ".github/workflows/schedule.yml"
+      - ".github/workflows/schedule-get-versions.yml"
     branches:
       - main
   schedule:
@@ -20,7 +20,7 @@ jobs:
       - name: Fetch nodered version
         run: |
           curl -sL https://api.github.com/repos/node-red/node-red-docker/releases/latest | \
-          jq -r ".tag_name" | cut -c 2- > build/nodered.version && cat build/nodered.version
+          jq -r ".tag_name" > nodered.version
 
       - name: Check for modified files
         id: git-check
@@ -37,3 +37,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
