@@ -14,6 +14,8 @@ on:
 env:
   IMAGE_NAME: nodered
   PLATFORMS: 'linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/amd64'
+  VERSION_FILE_NAME: 'VERSION'
+  VERSION_BUMP_FILE: 'version_increment'
 
 jobs:
   # Push image to GitHub Packages.
@@ -26,13 +28,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup git credentials
+        run: |
+          git config user.name 'GitHub Action'
+          git config user.email 'action@github.com'
+          git config user.password ${{ secrets.GITHUB_TOKEN }}
+          
+      # https://github.com/marketplace/actions/generate-version
+      - name: Get version fragment to bump
+        id: versionFragment
+        run: |
+          read -r versionFragment < ${{ env.VERSION_BUMP_FILE }}
+          echo "'$versionFragment' version will be incremented"
+          echo "::set-output name=VERSION_FRAGMENT::${versionFragment}"
+          
+      - name: Generate versions
+        uses: HardNorth/github-version-generate@v1.1.0
+        with:
+          version-source: file
+          version-file: ${{ env.VERSION_FILE_NAME }}
+          next-version-increment-patch: ${{ contains(steps.versionFragment.outputs.VERSION_FRAGMENT, 'patch') }}
+          next-version-increment-minor: ${{ contains(steps.versionFragment.outputs.VERSION_FRAGMENT, 'minor') }}
+          next-version-increment-major: ${{ contains(steps.versionFragment.outputs.VERSION_FRAGMENT, 'major') }}
+
       - name: Extract branch/tag name
         id: vars
         shell: bash
         run: |
+          VERSION=$(cat ${{ env.VERSION_FILE_NAME }})
           NODERED_VERSION=$(cat nodered.version)
           echo "##[set-output name=BRANCH_TAG;]$(echo ${GITHUB_REF#refs/*/})"
           echo "::set-output name=SHA_SHORT::$(git rev-parse --short HEAD)"
+          echo ::set-output name=VERSION::${VERSION}
           echo ::set-output name=NODERED_VERSION::${NODERED_VERSION}
 
       - name: QEMU - Set up
@@ -60,6 +87,7 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           push: true
           build-args: |
+            VERSION=${{ steps.vars.outputs.BRANCH_TAG }}
             NODERED_VERSION=${{ steps.vars.outputs.NODERED_VERSION }}
             GIT_HASH=${{ steps.vars.outputs.SHA_SHORT }}
             GIT_BRANCH=${{ steps.vars.outputs.BRANCH_TAG }}
@@ -75,8 +103,35 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           push: true
           build-args: |
+            VERSION=${{ steps.vars.outputs.VERSION }}
             NODERED_VERSION=${{ steps.vars.outputs.NODERED_VERSION }}
             GIT_HASH=${{ steps.vars.outputs.SHA_SHORT }}
             GIT_BRANCH=${{ steps.vars.outputs.BRANCH_TAG }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.vars.outputs.VERSION }}
+
+      - name: Tagging new version
+        id: newVersionTag
+        run: |
+          git tag -a v${{ env.RELEASE_VERSION }} -m "Release ${{ env.RELEASE_VERSION }}"
+          git push --tags
+        
+      - name: Create Release
+        id: createRelease
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+      
+      - name: Update version file
+        id: versionFileUpdate
+        run: |
+          echo '${{ env.NEXT_VERSION }}' > ${{ env.VERSION_FILE_NAME }}
+          git add ${{ env.VERSION_FILE_NAME }}
+          git commit -m "Version update"
+          git push
