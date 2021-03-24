@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           VERSION=$(cat ${{ env.VERSION_FILE_NAME }})
-          NODERED_VERSION=$(cat nodered.version)
+          NODERED_VERSION=$(cat nodered.version | cut -c 2-)
           echo "##[set-output name=BRANCH_TAG;]$(echo ${GITHUB_REF#refs/*/})"
           echo "::set-output name=SHA_SHORT::$(git rev-parse --short HEAD)"
           echo ::set-output name=VERSION::${VERSION}
