@@ -1,5 +1,7 @@
 ARG NODERED_VERSION
 
+ARG VERSION
+
 ARG GIT_HASH
 
 ARG GIT_BRANCH
@@ -17,6 +19,7 @@ RUN npm install -no-cache node-red-contrib-home-assistant-websocket && \
 # set version label
 LABEL maintainer="https://github.com/ngonkalves" \
     project="https://github.com/ngonkalves/docker-nodered" \
-    nodered-version="${NODERED_VERSION}"
+    version="${VERSION}" \
+    nodered-version="${NODERED_VERSION}" \
     git-branch="${GIT_BRANCH}" \
     git-hash="${GIT_HASH}"
