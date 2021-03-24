@@ -109,7 +109,15 @@ jobs:
             GIT_BRANCH=${{ steps.vars.outputs.BRANCH_TAG }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.vars.outputs.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.VERSION }}
+
+      - name: Update version file
+        id: versionFileUpdate
+        run: |
+          echo '${{ env.NEXT_VERSION }}' > ${{ env.VERSION_FILE_NAME }}
+          git add ${{ env.VERSION_FILE_NAME }}
+          git commit -m "Version update"
+          git push
 
       - name: Tagging new version
         id: newVersionTag
@@ -127,11 +135,3 @@ jobs:
           release_name: Release ${{ env.RELEASE_VERSION }}
           draft: false
           prerelease: false
-      
-      - name: Update version file
-        id: versionFileUpdate
-        run: |
-          echo '${{ env.NEXT_VERSION }}' > ${{ env.VERSION_FILE_NAME }}
-          git add ${{ env.VERSION_FILE_NAME }}
-          git commit -m "Version update"
-          git push
