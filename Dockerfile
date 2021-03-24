@@ -6,7 +6,7 @@ ARG GIT_HASH
 
 ARG GIT_BRANCH
 
-FROM nodered/node-red:${NODERED_VERSION}-minimal
+FROM nodered/node-red:${NODERED_VERSION#v*}-minimal
 
 MAINTAINER Nuno Goncalves <@ngonkalves>
 
