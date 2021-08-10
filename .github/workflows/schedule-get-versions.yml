@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MY_PERSONAL_TOKEN }}
 
       - name: Fetch nodered version
         run: |
