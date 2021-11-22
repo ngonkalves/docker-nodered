@@ -14,7 +14,8 @@ RUN npm install -no-cache node-red-contrib-home-assistant-websocket && \
     npm install -no-cache node-red-contrib-telegrambot && \
     npm install -no-cache node-red-contrib-influxdb && \
     npm install -no-cache node-red-contrib-bigtimer && \
-    npm install -no-cache node-red-dashboard
+    npm install -no-cache node-red-dashboard && \
+    npm install -no-cache node-red-contrib-heater-controller
 
 # set version label
 LABEL maintainer="https://github.com/ngonkalves" \
