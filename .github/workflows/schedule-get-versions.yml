@@ -27,7 +27,7 @@ jobs:
 
       - name: Check for modified files
         id: git-check
-        run: echo ::set-output name=modified::$(if ! git diff-index --quiet HEAD -- && cat nodered.version | grep -e "^v1\." 2>&1 > /dev/null; then echo "true"; else echo "false"; fi)
+        run: echo ::set-output name=modified::$(if ! git diff-index --quiet HEAD -- && cat nodered.version | grep -e "^v2\." 2>&1 > /dev/null; then echo "true"; else echo "false"; fi)
 
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'
