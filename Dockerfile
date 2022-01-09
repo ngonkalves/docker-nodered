@@ -10,7 +10,8 @@ FROM nodered/node-red:${NODERED_VERSION}-minimal
 
 MAINTAINER Nuno Goncalves <@ngonkalves>
 
-RUN npm install -no-cache node-red-contrib-home-assistant-websocket && \
+RUN npm install -no-cache node-red-debugger && \
+    npm install -no-cache node-red-contrib-home-assistant-websocket && \
     npm install -no-cache node-red-contrib-telegrambot && \
     npm install -no-cache node-red-contrib-influxdb && \
     npm install -no-cache node-red-contrib-bigtimer && \
